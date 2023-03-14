@@ -1,0 +1,39 @@
+>>> u1 = User.objects.create_user('Sasha') 
+>>> u2 = User.objects.create_user('Masha') 
+>>> from news_portal.models import Author
+>>> a1 = Author.objects.create(user_ref=u1)
+>>> a2 = Author.objects.create(user_ref=u2) 
+>>> from news_portal.models import Category   
+>>> cat1 = Category.objects.create(name='Sport')
+>>> cat2 = Category.objects.create(name='Kids')  
+>>> cat3 = Category.objects.create(name='Local')
+>>> cat3 = Category.objects.create(name='World News') 
+>>> cat4 = Category.objects.create(name='Local News')     
+>>> from news_portal.models import Post                
+>>> from news_portal.models import PostCategory
+>>> from news_portal.models import Comment
+>>> news1 = Post.objects.create(author_ref=a1, a_or_n=False, header='First place...', article_text = 'lalalabebebegagagagajhahahaha')   
+>>> post1 = Post.objects.create(author_ref=a1, a_or_n=True, header='First post...', article_text = 'lalalabebebegagagagajhahahaha1')  
+>>> post2 = Post.objects.create(author_ref=a2, a_or_n=True, header='Second post...', article_text = 'lalalabebebegagagagajhahahaha2') 
+>>> com1 = Comment.objects.create(post_ref=news1, user_ref=u1, com_text = 'lalalabebebegagagagajhahahaha3')                              
+>>> com1 = Comment.objects.create(post_ref=post1, user_ref=u1, com_text = 'lalalabebebegagagagajhahahaha4') 
+>>> com1 = Comment.objects.create(post_ref=post1, user_ref=u2, com_text = 'lalalabebebegagagagajhahahaha5') 
+>>> com1 = Comment.objects.create(post_ref=post2, user_ref=u1, com_text = 'lalalabebebegagagagajhahahaha6') 
+>>> pc1 = PostCategory.objects.create(post_ref=post2, category_ref=cat1)                                        
+>>> pc2 = PostCategory.objects.create(post_ref=post2, category_ref=cat2) 
+>>> pc2 = PostCategory.objects.create(post_ref=news1, category_ref=cat3) 
+>>> pc3 = PostCategory.objects.create(post_ref=news1, category_ref=cat3) 
+>>> pc4 = PostCategory.objects.create(post_ref=post1, category_ref=cat4)
+>>> news1.like()
+>>> news1.like()
+>>> com1.like()
+>>> com1.like()
+>>> com1.like()
+>>> news1.like()
+>>> news1.dislike()
+>>> a1.update_rating()
+>>> a2.update_rating()
+>>> Author.objects.all().order_by('-user_rating').values('user_ref', 'user_rating') 
+>>> Post.objects.all().order_by('-article_rating').values('time_create', 'author_ref','article_rating','header')[0]
+>>> ppp=Post.objects.all().order_by('-article_rating')[0]
+>>> ppp.comment_set.all() 
