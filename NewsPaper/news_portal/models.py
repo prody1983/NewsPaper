@@ -52,6 +52,9 @@ class Post(models.Model):
     def preview(self):
         return self.article_text[0:124]+'...'
 
+    def __str__(self):
+        return f'{self.header.title()}: {self.article_text[:20]}'
+
 
 class PostCategory(models.Model):
     post_ref = models.ForeignKey(Post, on_delete=models.CASCADE)
