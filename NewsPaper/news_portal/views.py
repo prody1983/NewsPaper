@@ -1,6 +1,8 @@
-from django.views.generic import ListView, DetailView
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
 from .filters import PostFilter
+from .forms import PostForm
 
 
 class PostsList(ListView):
@@ -43,3 +45,46 @@ class PostDetail(DetailView):
     template_name = 'post.html'
     # Название объекта, в котором будет выбранная статья
     context_object_name = 'post'
+
+# Добавляем новое представление для создания статьи.
+class PostCreate(CreateView):
+    # Указываем нашу разработанную форму
+    form_class = PostForm
+    # модель
+    model = Post
+    # и новый шаблон, в котором используется форма.
+    template_name = 'post_edit.html'
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        # признак статьи
+        post.a_or_n = 1
+        return super().form_valid(form)
+
+
+# Добавляем новое представление для создания новости.
+class NewsCreate(CreateView):
+    # Указываем нашу разработанную форму
+    form_class = PostForm
+    # модель
+    model = Post
+    # и новый шаблон, в котором используется форма.
+    template_name = 'post_edit.html'
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        # признак новости
+        post.a_or_n = 0
+        return super().form_valid(form)
+
+# Добавляем представление для изменения статьи.
+class PostUpdate(UpdateView):
+    form_class = PostForm
+    model = Post
+    template_name = 'post_edit.html'
+
+# Представление удаляющее статью.
+class PostDelete(DeleteView):
+    model = Post
+    template_name = 'post_delete.html'
+    success_url = reverse_lazy('post_list')
