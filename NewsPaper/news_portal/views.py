@@ -3,9 +3,14 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Post
 from .filters import PostFilter
 from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.shortcuts import redirect
+from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required
 
 
-class PostsList(ListView):
+class PostsList(LoginRequiredMixin, ListView):
     # Указываем модель, объекты которой мы будем выводить
     model = Post
     # Поле, которое будет использоваться для сортировки объектов
@@ -34,8 +39,11 @@ class PostsList(ListView):
        return self.filterset.qs
     def get_context_data(self, **kwargs):
        context = super().get_context_data(**kwargs)
+
        # Добавляем в контекст объект фильтрации.
        context['filterset'] = self.filterset
+       context['is_not_author'] = not self.request.user.groups.filter(name='authors').exists()
+
        return context
 
 class PostDetail(DetailView):
@@ -47,7 +55,9 @@ class PostDetail(DetailView):
     context_object_name = 'post'
 
 # Добавляем новое представление для создания статьи.
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin, CreateView):
+    permission_required = ('news_portal.add_post',)
+
     # Указываем нашу разработанную форму
     form_class = PostForm
     # модель
@@ -78,7 +88,8 @@ class NewsCreate(CreateView):
         return super().form_valid(form)
 
 # Добавляем представление для изменения статьи.
-class PostUpdate(UpdateView):
+class PostUpdate(PermissionRequiredMixin, UpdateView):
+    permission_required = ('news_portal.change_post',)
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
@@ -88,3 +99,11 @@ class PostDelete(DeleteView):
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('post_list')
+
+@login_required
+def upgrade_me(request):
+    user = request.user
+    premium_group = Group.objects.get(name='authors')
+    if not request.user.groups.filter(name='authors').exists():
+        premium_group.user_set.add(user)
+    return redirect('post_list')
