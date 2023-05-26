@@ -62,6 +62,9 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post_detail', args=[str(self.id)])
 
+    def get_post_url(self):
+        return f'/news/{self.id}'
+
 class PostCategory(models.Model):
     post_ref = models.ForeignKey(Post, on_delete=models.CASCADE)
     category_ref = models.ForeignKey(Category, on_delete=models.CASCADE)
