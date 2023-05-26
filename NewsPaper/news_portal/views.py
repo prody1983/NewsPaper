@@ -1,11 +1,11 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post
+from .models import Post, Category
 from .filters import PostFilter
 from .forms import PostForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 
@@ -107,3 +107,40 @@ def upgrade_me(request):
     if not request.user.groups.filter(name='authors').exists():
         premium_group.user_set.add(user)
     return redirect('post_list')
+
+class CategoryListView(ListView):
+    # Указываем модель, объекты которой мы будем выводить
+    model = Post
+    # Указываем имя шаблона, в котором будут все инструкции о том,
+    # как именно пользователю должны быть показаны наши объекты
+    template_name = 'category_list.html'
+    # Это имя списка, в котором будут лежать все объекты.
+    # Его надо указать, чтобы обратиться к списку объектов в html-шаблоне.
+    context_object_name = 'category_news_list'
+    paginate_by = 2  # вот так мы можем указать количество записей на странице
+
+   # Переопределяем функцию получения списка новостей
+    def get_queryset(self):
+        self.categories = get_object_or_404(Category, id=self.kwargs['pk'])
+        queryset = Post.objects.filter(categories=self.categories).order_by('-time_create')
+        return queryset
+
+    def get_context_data(self, **kwargs):
+       context = super().get_context_data(**kwargs)
+
+       # Добавляем в контекст переменные.
+       context['is_not_subscriber'] = self.request.user not in self.categories.subscribers.all()
+       context['category'] = self.categories
+
+       return context
+
+@login_required
+def subscribe(request, pk):
+    user = request.user
+    category = Category.objects.get(id=pk)
+    category.subscribers.add(user)
+
+    message = 'Вы успешно подписались на рассылку новостей категории'
+    return render(request, 'subscribe.html', {'category': category, 'message': message})
+
+
