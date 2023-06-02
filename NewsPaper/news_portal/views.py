@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+from .tasks import notify_about_new_post
 
 
 class PostsList(LoginRequiredMixin, ListView):
@@ -69,6 +70,7 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         post = form.save(commit=False)
         # признак статьи
         post.a_or_n = 1
+        notify_about_new_post.delay([post.pk])
         return super().form_valid(form)
 
 
@@ -85,6 +87,7 @@ class NewsCreate(CreateView):
         post = form.save(commit=False)
         # признак новости
         post.a_or_n = 0
+        notify_about_new_post.delay([post.pk])
         return super().form_valid(form)
 
 # Добавляем представление для изменения статьи.
