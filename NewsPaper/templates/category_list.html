@@ -21,6 +21,8 @@
 
    <hr>
 
+   {% load cache %} <!-- Загружаем кэширование -->
+   {% cache 30 list_categs %} <!-- Кэшируем отдельный блок на 30 секунд -->
    <ul class="list-group list-group-flush">
        {% for post in category_news_list %}
             <li class="list-group-item">
@@ -35,6 +37,7 @@
             </li>
        {% endfor %}
    </ul>
+   {% endcache %}
 
    {# Добавляем пагинацию на страницу #}
 

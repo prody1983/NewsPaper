@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
-
+from django.core.cache import cache
 
 class Author(models.Model):
     user_ref = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -65,6 +65,9 @@ class Post(models.Model):
     def get_post_url(self):
         return f'/news/{self.id}'
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs) # сначала вызываем метод родителя, чтобы объект сохранился
+        cache.delete(f'post-{self.pk}') # затем удаляем его из кэша, чтобы сбросить его
 class PostCategory(models.Model):
     post_ref = models.ForeignKey(Post, on_delete=models.CASCADE)
     category_ref = models.ForeignKey(Category, on_delete=models.CASCADE)
