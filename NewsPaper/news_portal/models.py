@@ -56,6 +56,10 @@ class Post(models.Model):
     def preview(self):
         return self.article_text[0:124]+'...'
 
+    @property
+    def get_author_name(self):
+        return self.author_ref.user_ref.username
+
     def __str__(self):
         return f'{self.header.title()}: {self.article_text[:20]}'
 

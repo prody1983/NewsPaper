@@ -40,9 +40,9 @@
 
            {% for post in posts %}
            <tr>
-               <td>{{ post.header|censor }}</td>
+               <td>{{ post.header|hide_forbidden }}</td>
                <td>{{ post.time_create }}</td>
-               <td>{{ post.article_text|truncatechars:20 }}</td>
+               <td>{{ post.article_text|truncatechars:100|hide_forbidden  }}</td>
                <td>{{ post.author_ref.user_ref.username }}</td>
            </tr>
            {% endfor %}
